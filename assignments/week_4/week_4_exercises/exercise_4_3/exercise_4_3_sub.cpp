@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
   sum_pub = nh.advertise<std_msgs::Float64>("output", 1);
 
-  ros::Subscriber custom_sub = nh.subscribe("cosine_sine", 1, customCallback);
+  //ros::Subscriber custom_sub = nh.subscribe("cosine_sine", 1, customCallback);
 
   ros::spin();
   ros::Rate rate(20);

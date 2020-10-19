@@ -11,12 +11,14 @@
 ros::Publisher gps_pub;
 std::default_random_engine generator;
 std::normal_distribution<double> distribution;
+double gps_mean, gps_variance;
+double speed;
 
 void poseCallback(const geometry_msgs::PoseStampedConstPtr msg) {
   geometry_msgs::PointStamped point;
   point.header = msg->header;
-  point.point.x = msg->pose.position.x + distribution(generator);
-  point.point.y = msg->pose.position.y + distribution(generator);
+  point.point.x = msg->pose.position.x + gps_variance*distribution(generator) + gps_mean;
+  point.point.y = msg->pose.position.y + gps_variance*distribution(generator) + gps_mean;
   point.point.z = 0;
 
   gps_pub.publish(point);
@@ -35,21 +37,22 @@ int main(int argc, char** argv){
   ros::Subscriber pose_sub = nh.subscribe("/oswin/ground_truth", 1, poseCallback);
 
   double mean, variance;
-  pNh.param("mean", mean, 0.0);
-  pNh.param("variance", variance, 1.0);
-  distribution =std::normal_distribution<double>(mean, variance);
+  pNh.param("gps_mean", gps_mean, 0.0);
+  pNh.param("gps_variance", gps_variance, 1.0);
+  distribution =std::normal_distribution<double>(0, 1.0);
 
-  ros::Duration wait(5);
+  ros::Duration wait(1);
   wait.sleep();
+  pNh.param("speed", speed, 0.5);
 
   geometry_msgs::Twist msg;
+  msg.linear.x = speed;
+  //msg.angular.z = speed/5;
 
   ros::Rate rate(20);
   while(ros::ok()) {
     ros::Time time = ros::Time::now();
 
-    msg.linear.x = 0.5;
-    msg.angular.z = 0.1;
     pub.publish(msg);
 
     ros::spinOnce();
