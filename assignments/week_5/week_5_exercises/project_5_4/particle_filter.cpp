@@ -33,8 +33,6 @@ void ParticleFilter::initParticles() {
 
   pNh.param("gps_cov", gps_cov_, 0.1);
 
-  pNh.param("mag_cov", mag_cov_, 0.1);
-
   switch (init_type) {
     case 0:
       // TODO standard init
@@ -66,7 +64,7 @@ void ParticleFilter::gpsCallback(const geometry_msgs::PointStampedConstPtr& msg)
 }
 
 void ParticleFilter::gpsSensorUpdate(const geometry_msgs::Point& point) {
-  double log_normalizer = log(sqrt(pow(2*M_PI, 2))) + log(sqrt(cov_x_)) + log(sqrt(cov_y_));
+  double log_normalizer = log(sqrt(pow(2*M_PI, 2))) + log(sqrt(gps_cov_)) + log(sqrt(gps_cov_));
   //std::cout << "gps: " << point.x << ", " << point.y << std::endl;
   //std::cout << "log norm: " << log_normalizer << std::endl;
 
@@ -74,8 +72,8 @@ void ParticleFilter::gpsSensorUpdate(const geometry_msgs::Point& point) {
     double logProb = 0;
     Particle p = this->particles_[i];
     //std::cout << "\nparticle: " << p.x << ", " << p.y << std::endl;
-    logProb += pow(point.x - p.x, 2)/cov_x_;
-    logProb += pow(point.y - p.y, 2)/cov_y_;
+    logProb += pow(point.x - p.x, 2)/gps_cov_;
+    logProb += pow(point.y - p.y, 2)/gps_cov_;
     //std::cout << "logProb: " << logProb << std::endl;
     logProb *= -0.5;
     logProb -= log_normalizer;
